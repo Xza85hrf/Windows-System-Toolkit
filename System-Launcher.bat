@@ -1,124 +1,221 @@
 @echo off
 setlocal enabledelayedexpansion
 title Windows System Toolkit v2.0.0
+color 0F
+
+REM ============================================================
+REM First-run detection
+REM ============================================================
+if not exist "%~dp0config\system-profile.json" (
+    cls
+    echo.
+    echo   =============================================================
+    echo.
+    echo     Welcome to Windows System Toolkit!
+    echo.
+    echo     This appears to be your first run.
+    echo     The Setup Wizard will now auto-detect your hardware
+    echo     and configure the toolkit for your system.
+    echo.
+    echo   =============================================================
+    echo.
+    pause
+    powershell -ExecutionPolicy Bypass -File "%~dp0Setup.ps1"
+    echo.
+    echo   Setup complete! Launching main menu...
+    timeout /t 2 >nul
+)
 
 :MENU
 cls
 echo.
-echo   =============================================================
-echo     WINDOWS SYSTEM TOOLKIT v2.0.0
-echo     System Maintenance ^& Automation
-echo   =============================================================
+echo   +-------------------------------------------------------------+
+echo   ^|                                                             ^|
+echo   ^|         WINDOWS SYSTEM TOOLKIT  v2.0.0                     ^|
+echo   ^|         System Maintenance ^& Automation                    ^|
+echo   ^|                                                             ^|
+echo   +-------------------------------------------------------------+
 echo.
-echo   [1] Monitor System Health
-echo   [2] Update All Packages          (Admin)
-echo   [3] Repair Windows Health         (Admin)
-echo   [4] Security Audit ^& Hardening   (Admin)
-echo   [5] Optimize WSL2                 (Admin)
-echo   [6] Install Scheduled Tasks       (Admin)
-echo   [7] Fix Network Stack             (Admin for fixes)
-echo   [8] Run All Diagnostics           (Monitor + Network + Security)
-echo   [9] Setup Wizard
-echo.
-echo   [S] View Scheduled Task Status
-echo   [L] View Recent Logs
-echo   [0] Exit
-echo.
-set /p "choice=  Select option: "
 
-if "%choice%"=="1" goto OPT1
-if "%choice%"=="2" goto OPT2
-if "%choice%"=="3" goto OPT3
-if "%choice%"=="4" goto OPT4
-if "%choice%"=="5" goto OPT5
-if "%choice%"=="6" goto OPT6
-if "%choice%"=="7" goto OPT7
-if "%choice%"=="8" goto OPT8
-if "%choice%"=="9" goto OPT9
-if /i "%choice%"=="S" goto OPTS
-if /i "%choice%"=="L" goto OPTL
+REM Show config status
+if exist "%~dp0config\system-profile.json" (
+    echo   Status: Configured
+) else (
+    echo   Status: NOT CONFIGURED - run [S] Setup Wizard first
+)
+
+REM Show last log date
+set "LASTLOG="
+for /f "delims=" %%D in ('dir /b /o-d "%~dp0logs" 2^>nul ^| findstr /r "^[0-9]"') do (
+    if not defined LASTLOG set "LASTLOG=%%D"
+)
+if defined LASTLOG (
+    echo   Last run: !LASTLOG!
+) else (
+    echo   Last run: Never
+)
+echo.
+echo   ------- Monitoring ^& Diagnostics ----------------------------
+echo.
+echo     [1]  Monitor System Health             no admin needed
+echo     [2]  Fix Network Stack                 no admin needed
+echo     [3]  Run All Diagnostics               quick full checkup
+echo.
+echo   ------- Maintenance ^& Updates --------------------------------
+echo.
+echo     [4]  Update All Packages               admin required
+echo     [5]  Repair Windows Health              admin required
+echo.
+echo   ------- Security ^& Optimization ------------------------------
+echo.
+echo     [6]  Security Audit ^& Hardening        admin required
+echo     [7]  Optimize WSL2                      admin required
+echo.
+echo   ------- Administration ----------------------------------------
+echo.
+echo     [8]  Scheduled Tasks Manager            admin required
+echo     [S]  Setup Wizard                       reconfigure system
+echo     [L]  View Recent Logs
+echo     [T]  View Scheduled Task Status
+echo.
+echo     [0]  Exit
+echo.
+set /p "choice=  Select [0-8, S, L, T]: "
+
+if "%choice%"=="1" goto OPT_MONITOR
+if "%choice%"=="2" goto OPT_NETWORK
+if "%choice%"=="3" goto OPT_DIAG_ALL
+if "%choice%"=="4" goto OPT_UPDATE
+if "%choice%"=="5" goto OPT_REPAIR
+if "%choice%"=="6" goto OPT_SECURITY
+if "%choice%"=="7" goto OPT_WSL
+if "%choice%"=="8" goto OPT_TASKS
+if /i "%choice%"=="S" goto OPT_SETUP
+if /i "%choice%"=="L" goto OPT_LOGS
+if /i "%choice%"=="T" goto OPT_TASK_STATUS
 if "%choice%"=="0" goto EXIT
+echo.
+echo   Invalid option. Press any key to try again...
+pause >nul
 goto MENU
 
-:OPT1
+REM ============================================================
+REM Monitoring & Diagnostics (no admin needed)
+REM ============================================================
+
+:OPT_MONITOR
 powershell -ExecutionPolicy Bypass -File "%~dp0Monitor-SystemHealth.ps1"
 goto PAUSE_MENU
 
-:OPT2
-powershell -Command "Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -File \"%~dp0Update-AllPackages.ps1\"' -Verb RunAs -Wait"
-goto PAUSE_MENU
-
-:OPT3
-powershell -Command "Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -File \"%~dp0Repair-WindowsHealth.ps1\"' -Verb RunAs -Wait"
-goto PAUSE_MENU
-
-:OPT4
-powershell -Command "Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -File \"%~dp0Harden-Security.ps1\"' -Verb RunAs -Wait"
-goto PAUSE_MENU
-
-:OPT5
-powershell -Command "Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -File \"%~dp0Optimize-WSL.ps1\"' -Verb RunAs -Wait"
-goto PAUSE_MENU
-
-:OPT6
-powershell -Command "Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -File \"%~dp0Install-ScheduledTasks.ps1\"' -Verb RunAs -Wait"
-goto PAUSE_MENU
-
-:OPT7
+:OPT_NETWORK
 powershell -ExecutionPolicy Bypass -File "%~dp0Fix-NetworkStack.ps1"
 goto PAUSE_MENU
 
-:OPT8
+:OPT_DIAG_ALL
+cls
 echo.
-echo   Running all diagnostics...
-echo   =========================
+echo   =============================================================
+echo     Running Full Diagnostics Suite
+echo   =============================================================
 echo.
-echo   --- System Health Monitor ---
+echo   [1/3] System Health Monitor
+echo   ---------------------------------------------------------
 powershell -ExecutionPolicy Bypass -File "%~dp0Monitor-SystemHealth.ps1" -Auto
 echo.
-echo   --- Network Stack Diagnostics ---
+echo   [2/3] Network Stack Diagnostics
+echo   ---------------------------------------------------------
 powershell -ExecutionPolicy Bypass -File "%~dp0Fix-NetworkStack.ps1" -ReportOnly
 echo.
-echo   --- Security Audit ---
+echo   [3/3] Security Audit (requires admin elevation)
+echo   ---------------------------------------------------------
 powershell -Command "Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -File \"%~dp0Harden-Security.ps1\" -ReportOnly' -Verb RunAs -Wait"
 echo.
-echo   All diagnostics complete.
+echo   =============================================================
+echo     All diagnostics complete. Check logs for details.
+echo   =============================================================
 goto PAUSE_MENU
 
-:OPT9
+REM ============================================================
+REM Maintenance & Updates (admin required)
+REM ============================================================
+
+:OPT_UPDATE
+echo.
+echo   This will elevate to Administrator...
+powershell -Command "Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -File \"%~dp0Update-AllPackages.ps1\"' -Verb RunAs -Wait"
+goto PAUSE_MENU
+
+:OPT_REPAIR
+echo.
+echo   This will elevate to Administrator...
+powershell -Command "Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -File \"%~dp0Repair-WindowsHealth.ps1\"' -Verb RunAs -Wait"
+goto PAUSE_MENU
+
+REM ============================================================
+REM Security & Optimization (admin required)
+REM ============================================================
+
+:OPT_SECURITY
+echo.
+echo   This will elevate to Administrator...
+powershell -Command "Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -File \"%~dp0Harden-Security.ps1\"' -Verb RunAs -Wait"
+goto PAUSE_MENU
+
+:OPT_WSL
+echo.
+echo   This will elevate to Administrator...
+powershell -Command "Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -File \"%~dp0Optimize-WSL.ps1\"' -Verb RunAs -Wait"
+goto PAUSE_MENU
+
+REM ============================================================
+REM Administration
+REM ============================================================
+
+:OPT_TASKS
+echo.
+echo   This will elevate to Administrator...
+powershell -Command "Start-Process powershell -ArgumentList '-ExecutionPolicy Bypass -File \"%~dp0Install-ScheduledTasks.ps1\"' -Verb RunAs -Wait"
+goto PAUSE_MENU
+
+:OPT_SETUP
 powershell -ExecutionPolicy Bypass -File "%~dp0Setup.ps1"
 goto PAUSE_MENU
 
-:OPTS
+:OPT_TASK_STATUS
 echo.
-echo Checking scheduled tasks...
+echo   Scheduled Task Status
+echo   ---------------------------------------------------------
 echo.
-schtasks /query /tn "WST-UpdatePackages" 2>nul || echo Task not found: WST-UpdatePackages
-schtasks /query /tn "WST-RepairHealth" 2>nul || echo Task not found: WST-RepairHealth
-schtasks /query /tn "WST-SecurityAudit" 2>nul || echo Task not found: WST-SecurityAudit
-schtasks /query /tn "WST-HealthMonitor" 2>nul || echo Task not found: WST-HealthMonitor
+for %%T in (WST-UpdatePackages WST-RepairHealth WST-SecurityAudit WST-HealthMonitor) do (
+    schtasks /query /tn "%%T" /fo LIST 2>nul | findstr /i "TaskName Status" || echo   %%T: Not installed
+    echo.
+)
+echo   Tip: Run [8] Scheduled Tasks Manager to install or manage tasks.
 goto PAUSE_MENU
 
-:OPTL
+:OPT_LOGS
 if not exist "%~dp0logs" (
-    echo Logs folder not found: %~dp0logs
-) else (
     echo.
-    echo Recent log files:
-    dir /b /o-d /s "%~dp0logs\*.log" 2>nul
-    echo.
-    set /p open=Open logs folder in Explorer? (Y/N):
-    if /i "!open!"=="Y" explorer "%~dp0logs"
+    echo   No logs found. Run a script first to generate logs.
+    goto PAUSE_MENU
 )
+echo.
+echo   Recent Logs (last 7 days)
+echo   ---------------------------------------------------------
+echo.
+powershell -NoProfile -Command "Get-ChildItem '%~dp0logs' -Recurse -Filter '*.log' | Where-Object { $_.LastWriteTime -gt (Get-Date).AddDays(-7) } | Sort-Object LastWriteTime -Descending | Select-Object -First 15 | ForEach-Object { $errors = @(Select-String '^\[-\]' $_.FullName).Count; $warns = @(Select-String '^\[!\]' $_.FullName).Count; Write-Host ('  {0}  {1,-35} Errors:{2} Warnings:{3}' -f ($_.LastWriteTime.ToString('yyyy-MM-dd HH:mm')), $_.BaseName, $errors, $warns) }"
+echo.
+set /p "openlog=  Open logs folder in Explorer? (Y/N): "
+if /i "!openlog!"=="Y" explorer "%~dp0logs"
 goto PAUSE_MENU
 
 :PAUSE_MENU
 echo.
-echo Press any key to return to menu...
+echo   Press any key to return to menu...
 pause >nul
 goto MENU
 
 :EXIT
 echo.
-echo Goodbye
+echo   Goodbye!
 exit /b 0

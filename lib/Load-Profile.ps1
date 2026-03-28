@@ -182,16 +182,28 @@ function Initialize-Profile {
 
     if ($ProfilePath -and (Test-Path $ProfilePath)) {
         try {
-            $json = Get-Content $ProfilePath -Raw -ErrorAction Stop | ConvertFrom-Json
-            $overrides = ConvertTo-HashtableFromJson $json
-            $merged = Merge-Hashtables -Base $defaults -Override $overrides
+            $raw = Get-Content $ProfilePath -Raw -ErrorAction Stop
+            if (-not $raw -or $raw.Trim().Length -eq 0) {
+                Write-Host "    [!] Config file is empty: $ProfilePath. Using defaults." -ForegroundColor Yellow
+                Write-Host "    [*] Run Setup.ps1 to regenerate your configuration." -ForegroundColor Cyan
+                $merged = $defaults
+            } else {
+                $json = $raw | ConvertFrom-Json
+                $overrides = ConvertTo-HashtableFromJson $json
+                $merged = Merge-Hashtables -Base $defaults -Override $overrides
+            }
         }
         catch {
-            Write-Warning "Failed to load profile from '$ProfilePath': $_. Using defaults."
+            Write-Host "    [!] Config file is invalid: $ProfilePath" -ForegroundColor Yellow
+            Write-Host "    [*] Error: $_" -ForegroundColor Yellow
+            Write-Host "    [*] Using default settings. Run Setup.ps1 to fix." -ForegroundColor Cyan
             $merged = $defaults
         }
     }
     else {
+        if ($ProfilePath) {
+            Write-Host "    [*] No config found. Using defaults. Run Setup.ps1 to configure." -ForegroundColor Cyan
+        }
         $merged = $defaults
     }
 

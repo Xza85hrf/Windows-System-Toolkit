@@ -1,3 +1,28 @@
+<#
+.SYNOPSIS
+    Repairs Windows health using DISM, SFC, and system cleanup.
+.DESCRIPTION
+    Performs system maintenance: DISM image repair, System File Checker,
+    temp file cleanup, Windows Update cache, disk health, and Defender scans.
+    Requires Administrator privileges.
+.PARAMETER Auto
+    Run without pausing for user input. Use for scheduled tasks.
+.PARAMETER QuickOnly
+    Skip DISM and SFC (the slow parts). Only run cleanup and checks.
+.PARAMETER FullScan
+    Run a full Windows Defender scan instead of a quick scan.
+.PARAMETER CleanBrowserCache
+    Also clear Chrome and Edge browser caches.
+.EXAMPLE
+    .\Repair-WindowsHealth.ps1
+    Full repair with DISM + SFC + cleanup (may take 15-20 minutes).
+.EXAMPLE
+    .\Repair-WindowsHealth.ps1 -QuickOnly
+    Quick cleanup only - skips DISM/SFC, runs in under 2 minutes.
+.EXAMPLE
+    .\Repair-WindowsHealth.ps1 -Auto -QuickOnly
+    Scheduled task mode - quick cleanup, no prompts.
+#>
 [CmdletBinding()]
 param(
     [switch]$Auto,
@@ -17,8 +42,10 @@ $logFile = Initialize-Log -ScriptPath $PSCommandPath -RootPath $PSScriptRoot
 Write-Banner -Title "Repair Windows Health"
 
 if (-not (Test-IsAdmin)) {
-    Write-Bad "This script must be run as Administrator."
-    exit 1
+    Write-Bad "This script requires Administrator privileges."
+    Write-Info "Right-click PowerShell and select 'Run as Administrator', then re-run this script."
+    Write-Info "Or use the System Launcher (System-Launcher.bat) which elevates automatically."
+    exit 2
 }
 Write-Good "Running as Administrator"
 
@@ -30,13 +57,23 @@ $cleanedMB = 0
 Write-Step -Step 1 -Total $totalSteps -Title "DISM Health Restore"
 if (-not $QuickOnly) {
     Write-Info "Running DISM /Online /Cleanup-Image /RestoreHealth..."
-    $dismOutput = & DISM /Online /Cleanup-Image /RestoreHealth 2>&1 | Out-String
-    Add-Content -Path $logFile -Value $dismOutput
+    Write-Info "This may take 10-15 minutes. Progress will be shown below."
+    $dismStart = Get-Date
+    & DISM /Online /Cleanup-Image /RestoreHealth 2>&1 | ForEach-Object {
+        $line = $_.ToString().Trim()
+        Add-Content -Path $logFile -Value $line
+        if ($line -match '\[=+') {
+            Write-Host "`r    [*] $line" -ForegroundColor Cyan -NoNewline
+        }
+    }
+    Write-Host ""
+    $dismDuration = [math]::Round(((Get-Date) - $dismStart).TotalMinutes, 1)
     if ($LASTEXITCODE -eq 0) {
-        Write-Good "DISM completed successfully"
+        Write-Good "DISM completed successfully ($dismDuration min)"
         $repairsCount++
     } else {
-        Write-Bad "DISM failed with exit code $LASTEXITCODE"
+        Write-Bad "DISM failed with exit code $LASTEXITCODE ($dismDuration min)"
+        Write-Info "Try: DISM /Online /Cleanup-Image /StartComponentCleanup"
         $issuesFound++
     }
 } else {
@@ -46,10 +83,19 @@ if (-not $QuickOnly) {
 Write-Step -Step 2 -Total $totalSteps -Title "System File Checker"
 if (-not $QuickOnly) {
     Write-Info "Running sfc /scannow..."
-    $sfcOutput = & sfc /scannow 2>&1 | Out-String
-    Add-Content -Path $logFile -Value $sfcOutput
+    Write-Info "This may take 5-10 minutes. Progress will be shown below."
+    $sfcStart = Get-Date
+    & sfc /scannow 2>&1 | ForEach-Object {
+        $line = $_.ToString().Trim()
+        Add-Content -Path $logFile -Value $line
+        if ($line -match '^\d+%|Verification|Beginning') {
+            Write-Host "`r    [*] $line" -ForegroundColor Cyan -NoNewline
+        }
+    }
+    Write-Host ""
+    $sfcDuration = [math]::Round(((Get-Date) - $sfcStart).TotalMinutes, 1)
     if ($LASTEXITCODE -eq 0) {
-        Write-Good "System file checker completed successfully"
+        Write-Good "System file checker completed ($sfcDuration min)"
         $repairsCount++
     } else {
         Write-Bad "System file checker found violations or errors"

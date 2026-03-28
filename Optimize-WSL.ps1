@@ -1,3 +1,28 @@
+<#
+.SYNOPSIS
+    Optimizes WSL2 configuration, services, and optional tooling.
+.DESCRIPTION
+    Configures wsl.conf, disables unnecessary services (cloud-init, snapd),
+    checks kernel version, reviews disk usage, and optionally installs
+    Node.js via NVM. Requires Administrator privileges.
+.PARAMETER Auto
+    Run without pausing for user input.
+.PARAMETER InstallNode
+    Install Node.js LTS via NVM inside WSL.
+.PARAMETER SetupCron
+    Configure cron jobs inside WSL (not yet implemented).
+.PARAMETER ReportOnly
+    Show current WSL state without making changes.
+.EXAMPLE
+    .\Optimize-WSL.ps1
+    Interactive optimization with prompts.
+.EXAMPLE
+    .\Optimize-WSL.ps1 -InstallNode
+    Optimize WSL and install Node.js via NVM.
+.EXAMPLE
+    .\Optimize-WSL.ps1 -ReportOnly
+    Check WSL status without changing anything.
+#>
 [CmdletBinding()]
 param(
     [switch]$Auto,
@@ -16,8 +41,9 @@ $logFile = Initialize-Log -ScriptPath $PSCommandPath -RootPath $PSScriptRoot
 Write-Banner -Title "Optimize WSL2"
 
 if (-not (Test-IsAdmin)) {
-    Write-Bad "This script must be run as Administrator."
-    exit 1
+    Write-Bad "This script requires Administrator privileges."
+    Write-Info "Right-click PowerShell and select 'Run as Administrator', then re-run this script."
+    exit 2
 }
 Write-Good "Administrator privileges confirmed."
 
@@ -35,6 +61,8 @@ $wslRaw = wsl --list --verbose 2>$null
 
 if ($LASTEXITCODE -ne 0 -or $wslRaw -eq $null) {
     Write-Bad "WSL is not installed or not responding."
+    Write-Info "Install WSL with: wsl --install"
+    Write-Info "Then restart your computer and re-run this script."
     exit 1
 }
 $wslRaw | ForEach-Object { Write-Data $_ }

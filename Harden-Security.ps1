@@ -1,3 +1,28 @@
+<#
+.SYNOPSIS
+    Audits system security: firewall, RDP, SSH, open ports, and more.
+.DESCRIPTION
+    Performs a comprehensive security audit including Sunshine encryption,
+    firewall profiles, RDP/NLA, SSH keys, open ports, Tailscale, and
+    Windows Defender status. Requires Administrator privileges.
+.PARAMETER Auto
+    Run without pausing for user input. Use for scheduled tasks.
+.PARAMETER FixSunshine
+    Automatically fix insecure Sunshine encryption settings.
+.PARAMETER ReportOnly
+    Generate a report without applying any fixes.
+.PARAMETER Detailed
+    Show extra details (Tailscale peers, Defender timestamps, etc).
+.EXAMPLE
+    .\Harden-Security.ps1 -ReportOnly
+    Audit-only mode - shows issues without changing anything.
+.EXAMPLE
+    .\Harden-Security.ps1 -FixSunshine
+    Audit and automatically fix Sunshine encryption settings.
+.EXAMPLE
+    .\Harden-Security.ps1 -Detailed
+    Verbose audit with extended information.
+#>
 [CmdletBinding()]
 param(
     [switch]$Auto,
@@ -16,7 +41,8 @@ $logFile = Initialize-Log -ScriptPath $PSCommandPath -RootPath $PSScriptRoot
 if (-not (Test-IsAdmin)) {
     Write-Banner -Title "Security Audit and Hardening"
     Write-Bad "This script requires Administrator privileges."
-    exit 1
+    Write-Info "Right-click PowerShell and select 'Run as Administrator', then re-run this script."
+    exit 2
 }
 
 $criticalCount = 0

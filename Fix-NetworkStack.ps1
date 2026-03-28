@@ -1,3 +1,27 @@
+<#
+.SYNOPSIS
+    Diagnoses and fixes network stack issues including NLA/NCSI problems.
+.DESCRIPTION
+    Checks network adapters, route metrics, DHCP/IP configuration,
+    protocol bindings, connectivity, and NLA/NCSI status. Can auto-fix
+    common issues like stale NLA cache, wrong adapter priority, and
+    stuck Wi-Fi. Diagnostics run without admin; fixes require admin.
+.PARAMETER Auto
+    Run without pausing for user input.
+.PARAMETER ReportOnly
+    Show diagnostics only, do not apply any fixes.
+.PARAMETER FixAll
+    Apply all available fixes automatically (requires admin).
+.EXAMPLE
+    .\Fix-NetworkStack.ps1
+    Run diagnostics. Fixes applied only if issues found and admin.
+.EXAMPLE
+    .\Fix-NetworkStack.ps1 -ReportOnly
+    Diagnostic-only mode - safe to run, changes nothing.
+.EXAMPLE
+    .\Fix-NetworkStack.ps1 -FixAll
+    Force all fixes (Ethernet priority, DNS flush, NLA reset, etc).
+#>
 [CmdletBinding()]
 param(
     [switch]$Auto,
@@ -453,4 +477,6 @@ if ($errors -gt 0) {
     Write-Data "- Check ISP router MAC filtering or device limits"
     Write-Data "- Check if router blocks NCSI probe (HTTP to msftconnecttest.com)"
     Write-Host ""
+    exit 1
 }
+exit 0

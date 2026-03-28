@@ -1,3 +1,23 @@
+<#
+.SYNOPSIS
+    Updates packages across Winget, WSL apt, and pip.
+.DESCRIPTION
+    Runs package upgrades across all configured package managers.
+    Supports exclusion lists and dry-run mode. Requires Administrator.
+.PARAMETER Auto
+    Run without pausing for user input. Use for scheduled tasks.
+.PARAMETER DryRun
+    Show what would be upgraded without making changes.
+.PARAMETER ExclusionFile
+    Path to a JSON file listing package names to skip.
+    Default: config\excluded-packages.json
+.EXAMPLE
+    .\Update-AllPackages.ps1 -DryRun
+    Preview available updates without installing anything.
+.EXAMPLE
+    .\Update-AllPackages.ps1 -Auto
+    Upgrade all packages silently (for scheduled tasks).
+#>
 [CmdletBinding()]
 param(
     [switch]$Auto,
@@ -17,8 +37,9 @@ Write-Banner -Title "Update All Packages"
 Add-Content -Path $logFile -Value "=== Update-AllPackages started at $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ==="
 
 if (-not (Test-IsAdmin)) {
-    Write-Bad "Administrator privileges required. Exiting."
-    exit 1
+    Write-Bad "Administrator privileges required."
+    Write-Info "Right-click PowerShell and select 'Run as Administrator', then re-run this script."
+    exit 2
 }
 
 $exclusions = @()

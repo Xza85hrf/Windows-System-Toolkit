@@ -1,3 +1,28 @@
+<#
+.SYNOPSIS
+    Manages automated scheduled tasks for the toolkit.
+.DESCRIPTION
+    Installs, removes, tests, or shows status of Windows Task Scheduler
+    tasks that run toolkit scripts automatically (daily updates,
+    weekly repairs, monthly security audits, daily health checks).
+    Requires Administrator privileges.
+.PARAMETER Auto
+    Run without interactive prompts.
+.PARAMETER Action
+    What to do: Install, Remove, Status (default), or Test.
+.EXAMPLE
+    .\Install-ScheduledTasks.ps1
+    Show current status of all scheduled tasks.
+.EXAMPLE
+    .\Install-ScheduledTasks.ps1 -Action Install
+    Install all scheduled tasks (interactive selection).
+.EXAMPLE
+    .\Install-ScheduledTasks.ps1 -Action Install -Auto
+    Install all scheduled tasks without prompts.
+.EXAMPLE
+    .\Install-ScheduledTasks.ps1 -Action Remove
+    Remove all scheduled tasks.
+#>
 [CmdletBinding()]
 param(
     [switch]$Auto,
@@ -15,8 +40,9 @@ $logFile = Initialize-Log -ScriptPath $PSCommandPath -RootPath $PSScriptRoot
 Write-Banner -Title "Scheduled Tasks Manager"
 
 if (-not (Test-IsAdmin)) {
-    Write-Bad "This script must be run as Administrator"
-    exit 1
+    Write-Bad "This script requires Administrator privileges."
+    Write-Info "Right-click PowerShell and select 'Run as Administrator', then re-run this script."
+    exit 2
 }
 Write-Good "Administrator check passed"
 

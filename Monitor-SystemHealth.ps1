@@ -1,3 +1,25 @@
+<#
+.SYNOPSIS
+    Monitors system health: CPU, RAM, GPU, disk, network, services, and WSL.
+.DESCRIPTION
+    Runs a comprehensive system health check with color-coded output.
+    Does NOT require Administrator privileges. Safe to run anytime.
+.PARAMETER Auto
+    Run without pausing for user input at the end. Use for scheduled tasks.
+.PARAMETER Report
+    Save a detailed report to the log file.
+.PARAMETER Json
+    Output health data as JSON to the console.
+.EXAMPLE
+    .\Monitor-SystemHealth.ps1
+    Interactive mode - pauses at the end for review.
+.EXAMPLE
+    .\Monitor-SystemHealth.ps1 -Auto -Report
+    Automated mode - runs silently and saves a detailed log.
+.EXAMPLE
+    .\Monitor-SystemHealth.ps1 -Json | ConvertFrom-Json
+    Outputs structured health data for scripting.
+#>
 [CmdletBinding()]
 param(
     [switch]$Auto,
