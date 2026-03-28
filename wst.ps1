@@ -47,6 +47,12 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
+    [ArgumentCompleter({
+        param($cmd, $param, $word)
+        @('monitor','update','repair','security','network','wsl',
+          'tasks','setup','diag','status','logs','help') |
+            Where-Object { $_ -like "$word*" }
+    })]
     [string]$Command,
 
     [Parameter(Position = 1, ValueFromRemainingArguments)]

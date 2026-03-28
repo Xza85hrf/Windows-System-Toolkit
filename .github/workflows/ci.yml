@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  syntax-check:
+    name: PowerShell Syntax Check
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parse all PowerShell scripts
+        shell: pwsh
+        run: |
+          $failed = $false
+          Get-ChildItem -Path . -Filter "*.ps1" -Recurse | ForEach-Object {
+              $tokens = $null; $errors = $null
+              $null = [System.Management.Automation.Language.Parser]::ParseFile(
+                  $_.FullName, [ref]$tokens, [ref]$errors
+              )
+              if ($errors.Count -gt 0) {
+                  $failed = $true
+                  Write-Host "FAIL: $($_.Name)" -ForegroundColor Red
+                  foreach ($e in $errors) {
+                      Write-Host "  Line $($e.Extent.StartLineNumber): $($e.Message)"
+                  }
+              } else {
+                  Write-Host "OK: $($_.Name)" -ForegroundColor Green
+              }
+          }
+          if ($failed) { exit 1 }
+
+      - name: Verify all scripts have comment-based help
+        shell: pwsh
+        run: |
+          $failed = $false
+          $scripts = Get-ChildItem -Path . -Filter "*.ps1" -Depth 0
+          foreach ($s in $scripts) {
+              $help = Get-Help $s.FullName -ErrorAction SilentlyContinue
+              if (-not $help.Synopsis -or $help.Synopsis -eq $s.FullName) {
+                  Write-Host "MISSING HELP: $($s.Name)" -ForegroundColor Red
+                  $failed = $true
+              } else {
+                  Write-Host "OK: $($s.Name) - $($help.Synopsis)" -ForegroundColor Green
+              }
+          }
+          if ($failed) { exit 1 }
+
+  pester-tests:
+    name: Pester Tests
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Install-Module -Name Pester -Force -SkipPublisherCheck -Scope CurrentUser
+
+      - name: Run tests
+        shell: pwsh
+        run: |
+          $config = New-PesterConfiguration
+          $config.Run.Path = "./tests"
+          $config.Output.Verbosity = "Detailed"
+          $config.TestResult.Enabled = $true
+          $config.TestResult.OutputPath = "${{ runner.temp }}/test-results.xml"
+          Invoke-Pester -Configuration $config

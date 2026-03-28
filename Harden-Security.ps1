@@ -13,6 +13,8 @@
     Generate a report without applying any fixes.
 .PARAMETER Detailed
     Show extra details (Tailscale peers, Defender timestamps, etc).
+.PARAMETER DryRun
+    Alias for -ReportOnly. Show audit results without applying fixes.
 .EXAMPLE
     .\Harden-Security.ps1 -ReportOnly
     Audit-only mode - shows issues without changing anything.
@@ -28,9 +30,13 @@ param(
     [switch]$Auto,
     [switch]$FixSunshine,
     [switch]$ReportOnly,
-    [switch]$Detailed
+    [switch]$Detailed,
+    [switch]$DryRun
 )
 $ErrorActionPreference = "Continue"
+
+# DryRun is an alias for ReportOnly
+if ($DryRun) { $ReportOnly = $true }
 
 # --- Load shared modules ---
 . (Join-Path $PSScriptRoot "lib\Load-Profile.ps1")

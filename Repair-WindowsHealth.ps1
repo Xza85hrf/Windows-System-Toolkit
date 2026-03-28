@@ -13,9 +13,14 @@
     Run a full Windows Defender scan instead of a quick scan.
 .PARAMETER CleanBrowserCache
     Also clear Chrome and Edge browser caches.
+.PARAMETER DryRun
+    Show what would be done without making any changes.
 .EXAMPLE
     .\Repair-WindowsHealth.ps1
     Full repair with DISM + SFC + cleanup (may take 15-20 minutes).
+.EXAMPLE
+    .\Repair-WindowsHealth.ps1 -DryRun
+    Preview all steps without running repairs or deleting files.
 .EXAMPLE
     .\Repair-WindowsHealth.ps1 -QuickOnly
     Quick cleanup only - skips DISM/SFC, runs in under 2 minutes.
@@ -28,7 +33,8 @@ param(
     [switch]$Auto,
     [switch]$QuickOnly,
     [switch]$FullScan,
-    [switch]$CleanBrowserCache
+    [switch]$CleanBrowserCache,
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = "Continue"
@@ -48,6 +54,7 @@ if (-not (Test-IsAdmin)) {
     exit 2
 }
 Write-Good "Running as Administrator"
+if ($DryRun) { Write-Warn "DRY RUN MODE - no changes will be made" }
 
 $totalSteps = 8
 $repairsCount = 0
@@ -55,7 +62,9 @@ $issuesFound = 0
 $cleanedMB = 0
 
 Write-Step -Step 1 -Total $totalSteps -Title "DISM Health Restore"
-if (-not $QuickOnly) {
+if ($DryRun) {
+    Write-Info "[DryRun] Would run: DISM /Online /Cleanup-Image /RestoreHealth"
+} elseif (-not $QuickOnly) {
     Write-Info "Running DISM /Online /Cleanup-Image /RestoreHealth..."
     Write-Info "This may take 10-15 minutes. Progress will be shown below."
     $dismStart = Get-Date
@@ -76,12 +85,14 @@ if (-not $QuickOnly) {
         Write-Info "Try: DISM /Online /Cleanup-Image /StartComponentCleanup"
         $issuesFound++
     }
-} else {
+} elseif ($QuickOnly) {
     Write-Info "Skipping DISM (QuickOnly mode)"
 }
 
 Write-Step -Step 2 -Total $totalSteps -Title "System File Checker"
-if (-not $QuickOnly) {
+if ($DryRun) {
+    Write-Info "[DryRun] Would run: sfc /scannow"
+} elseif (-not $QuickOnly) {
     Write-Info "Running sfc /scannow..."
     Write-Info "This may take 5-10 minutes. Progress will be shown below."
     $sfcStart = Get-Date
@@ -119,8 +130,12 @@ foreach ($path in $tempPaths) {
         $count = $files.Count
         $size = ($files | Measure-Object -Property Length -Sum -ErrorAction SilentlyContinue).Sum
         $sizeInMB = [math]::Round($size / 1MB, 2)
-        Write-Info "Clearing $path - $count files, $sizeInMB MB"
-        Remove-Item -Path "$path\*" -Recurse -Force -ErrorAction SilentlyContinue
+        if ($DryRun) {
+            Write-Info "[DryRun] Would clear $path - $count files, $sizeInMB MB"
+        } else {
+            Write-Info "Clearing $path - $count files, $sizeInMB MB"
+            Remove-Item -Path "$path\*" -Recurse -Force -ErrorAction SilentlyContinue
+        }
         $cleanedMB += $sizeInMB
     } else {
         Write-Warn "Path not found: $path"
@@ -135,13 +150,17 @@ if (Test-Path $softwareDistributionPath) {
     Write-Info "Windows Update cache size: $cacheSizeMB MB"
     $cacheLimitMB = Get-ProfileValue $config "Windows.updateCache.sizeThresholdMB" 500
     if ($cacheSize -gt ($cacheLimitMB * 1MB)) {
-        Write-Warn "Cache size exceeds ${cacheLimitMB}MB, clearing..."
-        Stop-Service -Name wuauserv -Force -ErrorAction SilentlyContinue
-        Remove-Item -Path "$softwareDistributionPath\*" -Recurse -Force -ErrorAction SilentlyContinue
-        Start-Service -Name wuauserv -ErrorAction SilentlyContinue
-        Write-Good "Windows Update cache cleared"
-        $repairsCount++
-        $cleanedMB += $cacheSizeMB
+        if ($DryRun) {
+            Write-Info "[DryRun] Would clear Windows Update cache ($cacheSizeMB MB)"
+        } else {
+            Write-Warn "Cache size exceeds ${cacheLimitMB}MB, clearing..."
+            Stop-Service -Name wuauserv -Force -ErrorAction SilentlyContinue
+            Remove-Item -Path "$softwareDistributionPath\*" -Recurse -Force -ErrorAction SilentlyContinue
+            Start-Service -Name wuauserv -ErrorAction SilentlyContinue
+            Write-Good "Windows Update cache cleared"
+            $repairsCount++
+            $cleanedMB += $cacheSizeMB
+        }
     } else {
         Write-Info "Cache size within acceptable range"
     }
@@ -175,7 +194,10 @@ if ($defenderStatus) {
     Write-Data "Antivirus signature age: $sigAge days"
     Write-Data "Last quick scan: $lastQuick ($daysSinceQuick days ago)"
     $scanDaysWarn = Get-ProfileValue $config "Windows.defenderScan.daysBeforeWarning" 7
-    if ($FullScan) {
+    if ($DryRun) {
+        $scanType = if ($FullScan) { "Full" } elseif ($daysSinceQuick -gt $scanDaysWarn) { "Quick" } else { "None needed" }
+        Write-Info "[DryRun] Would run: $scanType Defender scan"
+    } elseif ($FullScan) {
         Write-Info "Starting full scan..."
         Start-MpScan -ScanType FullScan -ErrorAction SilentlyContinue
         Write-Good "Full scan started"
