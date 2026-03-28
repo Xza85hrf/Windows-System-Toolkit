@@ -6,33 +6,39 @@
 
 Comprehensive Windows 11 system maintenance, security hardening, and automation toolkit with a unified CLI.
 
+## Install
+
+**One-liner** (no download needed):
+```powershell
+irm https://raw.githubusercontent.com/Xza85hrf/Windows-System-Toolkit/master/remote-install.ps1 | iex
+```
+
+**Scoop**:
+```powershell
+scoop bucket add wst https://github.com/Xza85hrf/Windows-System-Toolkit
+scoop install wst
+```
+
+**Git clone**:
+```powershell
+git clone https://github.com/Xza85hrf/Windows-System-Toolkit.git
+cd Windows-System-Toolkit
+.\install.ps1    # adds to PATH + tab completion
+.\wst.ps1 setup  # auto-detect hardware
+```
+
+**Manual**: [Download ZIP](https://github.com/Xza85hrf/Windows-System-Toolkit/archive/refs/heads/master.zip), extract, run `wst.ps1`.
+
 ## Quick Start
 
 ```powershell
-# First run — auto-detects your hardware
-.\wst.ps1 setup
-
-# Check system health
-.\wst.ps1 monitor
-
-# Full diagnostics (health + network + security)
-.\wst.ps1 diag
-
-# Quick system overview
-.\wst.ps1 status
+wst.ps1 monitor       # system health check
+wst.ps1 diag          # full diagnostics suite
+wst.ps1 status        # instant system overview
+wst.ps1 help          # all commands
 ```
 
 Or double-click **System-Launcher.bat** for an interactive menu.
-
-### Installation (optional)
-
-To use `wst` from anywhere, run the install script:
-
-```powershell
-.\install.ps1
-```
-
-This adds the toolkit to your PATH and sets up tab completion.
 
 ## What It Looks Like
 

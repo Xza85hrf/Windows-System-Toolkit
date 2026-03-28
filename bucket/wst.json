@@ -1,0 +1,19 @@
+{
+    "version": "2.1.0",
+    "description": "Windows System Toolkit - system maintenance, security hardening, and automation",
+    "homepage": "https://github.com/Xza85hrf/Windows-System-Toolkit",
+    "license": "MIT",
+    "url": "https://github.com/Xza85hrf/Windows-System-Toolkit/archive/refs/tags/v2.1.0.zip",
+    "extract_dir": "Windows-System-Toolkit-2.1.0",
+    "bin": "wst.ps1",
+    "post_install": [
+        "Write-Host 'Windows System Toolkit installed!' -ForegroundColor Green",
+        "Write-Host 'Run: wst.ps1 setup   to configure for your system' -ForegroundColor Yellow",
+        "Write-Host 'Run: wst.ps1 help    to see all commands' -ForegroundColor Yellow"
+    ],
+    "checkver": "github",
+    "autoupdate": {
+        "url": "https://github.com/Xza85hrf/Windows-System-Toolkit/archive/refs/tags/v$version.zip",
+        "extract_dir": "Windows-System-Toolkit-$version"
+    }
+}

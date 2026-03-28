@@ -1,0 +1,44 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.singleton.1.6.0.schema.json
+# Winget manifest for Windows System Toolkit
+# Submit to: https://github.com/microsoft/winget-pkgs
+#
+# To submit:
+#   1. Fork microsoft/winget-pkgs
+#   2. Copy this file to: manifests/x/Xza85hrf/WindowsSystemToolkit/2.1.0/
+#   3. Rename to: Xza85hrf.WindowsSystemToolkit.yaml
+#   4. Open a PR
+
+PackageIdentifier: Xza85hrf.WindowsSystemToolkit
+PackageVersion: 2.1.0
+PackageName: Windows System Toolkit
+Publisher: Xza85hrf
+License: MIT
+LicenseUrl: https://github.com/Xza85hrf/Windows-System-Toolkit/blob/master/LICENSE
+ShortDescription: Comprehensive Windows 11 system maintenance, security hardening, and automation toolkit.
+Description: |-
+  Windows System Toolkit provides a unified CLI (wst.ps1) for system health monitoring,
+  package updates (Winget/apt/pip), Windows repair (DISM/SFC), security auditing,
+  WSL optimization, network diagnostics with NLA/NCSI detection, and scheduled
+  maintenance automation. Color-coded output, automatic logging, and configuration
+  via JSON profiles with auto-detection.
+Tags:
+  - automation
+  - cli
+  - maintenance
+  - monitoring
+  - powershell
+  - security
+  - system
+  - toolkit
+  - windows
+PackageUrl: https://github.com/Xza85hrf/Windows-System-Toolkit
+Installers:
+  - Architecture: neutral
+    InstallerType: zip
+    InstallerUrl: https://github.com/Xza85hrf/Windows-System-Toolkit/archive/refs/tags/v2.1.0.zip
+    NestedInstallerType: portable
+    NestedInstallerFiles:
+      - RelativeFilePath: Windows-System-Toolkit-2.1.0\wst.ps1
+        PortableCommandAlias: wst
+ManifestType: singleton
+ManifestVersion: 1.6.0
