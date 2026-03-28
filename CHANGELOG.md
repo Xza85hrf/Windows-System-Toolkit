@@ -1,5 +1,29 @@
 # Changelog
 
+## [2.1.0] - 2026-03-28
+
+### Added
+- **wst.ps1** - Unified CLI entry point for all toolkit operations
+  - Subcommand interface: `wst monitor`, `wst update`, `wst repair`, etc.
+  - `wst status` - quick system overview (CPU, RAM, disks, network, config, tasks)
+  - `wst logs [-Days N]` - view recent logs with error/warning counts per file
+  - `wst diag` - run all diagnostics in sequence (health + network + security)
+  - `wst help` - full command reference with examples
+  - Interactive menu when run without arguments (replaces old batch menu)
+  - Auto-elevation: admin commands prompt UAC automatically
+  - First-run detection: Setup wizard runs on first use
+  - Pass-through flags: `wst update -DryRun`, `wst repair -QuickOnly`, etc.
+- Comment-based help on all scripts (`Get-Help .\script.ps1` now works)
+- Live progress streaming for DISM/SFC in Repair-WindowsHealth.ps1
+- Actionable error messages across all scripts (tells user what to do next)
+- Config validation in Load-Profile.ps1 (warns on empty/corrupt JSON)
+- `config/excluded-packages.json` - example exclusion list for package updates
+
+### Changed
+- System-Launcher.bat simplified to thin wrapper around wst.ps1
+- Admin check errors now exit with code 2 (not 1) for consistent exit codes
+- README.md rewritten around unified CLI usage
+
 ## [2.0.0] - 2026-03-28
 
 ### Added
