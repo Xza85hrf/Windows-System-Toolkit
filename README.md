@@ -1,5 +1,9 @@
 # Windows System Toolkit
 
+[![CI](https://github.com/Xza85hrf/Windows-System-Toolkit/actions/workflows/ci.yml/badge.svg)](https://github.com/Xza85hrf/Windows-System-Toolkit/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![PowerShell 5.1+](https://img.shields.io/badge/PowerShell-5.1%2B-blue.svg)](https://docs.microsoft.com/en-us/powershell/)
+
 Comprehensive Windows 11 system maintenance, security hardening, and automation toolkit with a unified CLI.
 
 ## Quick Start
@@ -19,6 +23,77 @@ Comprehensive Windows 11 system maintenance, security hardening, and automation 
 ```
 
 Or double-click **System-Launcher.bat** for an interactive menu.
+
+### Installation (optional)
+
+To use `wst` from anywhere, run the install script:
+
+```powershell
+.\install.ps1
+```
+
+This adds the toolkit to your PATH and sets up tab completion.
+
+## What It Looks Like
+
+**`.\wst.ps1 status`** - instant system overview:
+```
+  SYSTEM
+    Computer:  MYPC
+    Admin:     No
+    CPU:       AMD Ryzen 9 7950X 16-Core Processor
+    RAM:       72.9GB free / 191.2GB (62% used)
+
+  DISKS
+    C:  1938GB free (52%)    D:  4985GB free (67%)
+
+  NETWORK
+    Ethernet:  Internet
+
+  CONFIG
+    Profile:   Configured (0d ago)
+    Last run:  Monitor-SystemHealth (0.2h ago)
+```
+
+**`.\wst.ps1 monitor`** - full health dashboard:
+```
+  Step 1 of 8 : CPU Usage & Temperature
+  --------------------------------------------------
+      Processor: AMD Ryzen 9 7950X (16C/32T) | Load: 12%
+    [+] CPU temperature OK
+
+  Step 3 of 8 : GPU Temperature & Utilization
+  --------------------------------------------------
+      GPU: NVIDIA GeForce RTX 5060 Ti
+      Temp: 42C | Util: 11% | VRAM: 15961/16311 MB
+    [+] GPU OK
+
+  Step 5 of 8 : Network Adapters
+  --------------------------------------------------
+    [+] Ethernet: Internet
+    [!] Tailscale: LocalNetwork (NLA not detecting internet)
+
+  SYSTEM HEALTH SUMMARY
+    [!]  OK: 18  |  Warnings: 2  |  Errors: 0
+```
+
+**`.\wst.ps1 help`** - all commands at a glance:
+```
+  USAGE:
+    .\wst.ps1 <command> [options]
+
+  COMMANDS:
+    Diagnostics (no admin needed):
+      monitor       system health dashboard
+      network       network stack diagnostics
+      diag          run all diagnostics at once
+      status        quick system overview
+
+    Maintenance (admin auto-elevated):
+      update        update Winget, apt, pip packages
+      repair        DISM, SFC, cleanup, Defender
+      security      security audit and hardening
+```
 
 ## Commands
 

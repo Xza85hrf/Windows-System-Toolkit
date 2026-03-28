@@ -6,6 +6,19 @@
     Auto-detects hardware (CPU, RAM, GPUs, drives, WSL, installed services),
     prompts for threshold overrides and preferences, and generates
     config/system-profile.json. Re-runnable: preserves existing customizations.
+.PARAMETER Auto
+    Skip all interactive prompts. Use detected values and defaults.
+.PARAMETER DetectOnly
+    Detect hardware and display results without saving a profile.
+.EXAMPLE
+    .\Setup.ps1
+    Interactive setup - detects hardware then prompts for threshold customization.
+.EXAMPLE
+    .\Setup.ps1 -Auto
+    Non-interactive setup - detect and save with all defaults.
+.EXAMPLE
+    .\Setup.ps1 -DetectOnly
+    Show detected hardware without creating or modifying the config file.
 #>
 [CmdletBinding()]
 param(
