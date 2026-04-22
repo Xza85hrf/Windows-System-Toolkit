@@ -15,6 +15,7 @@ Register-ArgumentCompleter -CommandName 'wst.ps1' -ParameterName 'Command' -Scri
         @{ Name = 'security'; Desc = 'Security audit and hardening' }
         @{ Name = 'network';  Desc = 'Network diagnostics and fix' }
         @{ Name = 'wsl';      Desc = 'WSL2 optimization' }
+        @{ Name = 'wslgpu';   Desc = 'WSL2 GPU passthrough diagnostics and fix' }
         @{ Name = 'tasks';    Desc = 'Scheduled tasks manager' }
         @{ Name = 'setup';    Desc = 'Configuration wizard' }
         @{ Name = 'diag';     Desc = 'Run all diagnostics' }

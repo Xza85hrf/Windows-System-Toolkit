@@ -113,6 +113,7 @@ Or double-click **System-Launcher.bat** for an interactive menu.
 | `wst repair` | DISM, SFC, temp cleanup, Defender scans | Yes |
 | `wst security` | Security audit (firewall, RDP, SSH, ports) | Yes |
 | `wst wsl` | WSL2 optimization and configuration | Yes |
+| `wst wslgpu` | WSL2 GPU passthrough diagnostics and fix | Yes |
 | `wst tasks` | Manage scheduled maintenance tasks | Yes |
 | `wst setup` | Configuration wizard (hardware detection) | No |
 | `wst logs` | View recent logs with error/warning counts | No |
@@ -165,6 +166,7 @@ Setup.ps1                    # Configuration wizard
 ├── Repair-WindowsHealth.ps1 # System repair
 ├── Harden-Security.ps1      # Security audit
 ├── Optimize-WSL.ps1         # WSL optimization
+├── Fix-WSLGPU.ps1           # WSL2 GPU passthrough diag/fix
 ├── Fix-NetworkStack.ps1     # Network diagnostics
 ├── Install-ScheduledTasks.ps1 # Task scheduler
 │

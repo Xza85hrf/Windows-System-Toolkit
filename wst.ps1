@@ -49,7 +49,7 @@ param(
     [Parameter(Position = 0)]
     [ArgumentCompleter({
         param($cmd, $param, $word)
-        @('monitor','update','repair','security','network','wsl',
+        @('monitor','update','repair','security','network','wsl','wslgpu',
           'tasks','setup','diag','status','logs','help') |
             Where-Object { $_ -like "$word*" }
     })]
@@ -60,7 +60,7 @@ param(
 )
 
 $ErrorActionPreference = "Continue"
-$WST_VERSION = "2.0.0"
+$WST_VERSION = "2.2.0"
 $WST_ROOT = $PSScriptRoot
 
 # --- Load shared modules ---
@@ -78,6 +78,7 @@ $commands = [ordered]@{
     security = @{ Script = "Harden-Security.ps1";        Desc = "Security audit and hardening";       Admin = $true }
     network  = @{ Script = "Fix-NetworkStack.ps1";       Desc = "Network diagnostics and fix";        Admin = $false }
     wsl      = @{ Script = "Optimize-WSL.ps1";           Desc = "WSL2 optimization";                  Admin = $true }
+    wslgpu   = @{ Script = "Fix-WSLGPU.ps1";              Desc = "WSL2 GPU passthrough diag/fix";      Admin = $true }
     tasks    = @{ Script = "Install-ScheduledTasks.ps1";  Desc = "Scheduled tasks manager";           Admin = $true }
     setup    = @{ Script = "Setup.ps1";                  Desc = "Configuration wizard";                Admin = $false }
 }
@@ -140,6 +141,7 @@ function Show-Help {
     Write-Host "      repair                         " -NoNewline; Write-Host "DISM, SFC, cleanup, Defender" -ForegroundColor Gray
     Write-Host "      security                       " -NoNewline; Write-Host "security audit and hardening" -ForegroundColor Gray
     Write-Host "      wsl                            " -NoNewline; Write-Host "WSL2 optimization" -ForegroundColor Gray
+    Write-Host "      wslgpu                         " -NoNewline; Write-Host "WSL2 GPU passthrough diag and fix" -ForegroundColor Gray
     Write-Host ""
     Write-Host "    Administration:" -ForegroundColor Cyan
     Write-Host "      tasks                          " -NoNewline; Write-Host "manage scheduled tasks" -ForegroundColor Gray
@@ -413,6 +415,7 @@ function Show-InteractiveMenu {
         Write-Host "      [9]  Setup Wizard" -ForegroundColor White
         Write-Host ""
         Write-Host "    Tools" -ForegroundColor Cyan
+        Write-Host "      [G]  WSL2 GPU Passthrough Fix" -ForegroundColor White
         Write-Host "      [S]  System Status" -ForegroundColor White
         Write-Host "      [L]  View Logs" -ForegroundColor White
         Write-Host "      [0]  Exit" -ForegroundColor White
@@ -430,6 +433,7 @@ function Show-InteractiveMenu {
             "7" { Invoke-ToolkitScript "Optimize-WSL.ps1" @() $true }
             "8" { Invoke-ToolkitScript "Install-ScheduledTasks.ps1" @() $true }
             "9" { Invoke-ToolkitScript "Setup.ps1" @() $false }
+            { $_ -eq "G" -or $_ -eq "g" } { Invoke-ToolkitScript "Fix-WSLGPU.ps1" @() $true }
             { $_ -eq "S" -or $_ -eq "s" } { Show-Status }
             { $_ -eq "L" -or $_ -eq "l" } { Show-Logs }
             "0" { Write-Host ""; Write-Host "  Goodbye!" -ForegroundColor Magenta; Write-Host ""; return }

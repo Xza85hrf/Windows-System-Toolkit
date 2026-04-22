@@ -13,9 +13,9 @@ Describe "Script Syntax Validation" {
     }
 
     It "parses <_> without errors" -ForEach @(
-        'Fix-NetworkStack.ps1', 'Harden-Security.ps1', 'Install-ScheduledTasks.ps1',
-        'Monitor-SystemHealth.ps1', 'Optimize-WSL.ps1', 'Repair-WindowsHealth.ps1',
-        'Setup.ps1', 'Update-AllPackages.ps1', 'wst.ps1',
+        'Fix-NetworkStack.ps1', 'Fix-WSLGPU.ps1', 'Harden-Security.ps1',
+        'Install-ScheduledTasks.ps1', 'Monitor-SystemHealth.ps1', 'Optimize-WSL.ps1',
+        'Repair-WindowsHealth.ps1', 'Setup.ps1', 'Update-AllPackages.ps1', 'wst.ps1',
         'lib\Load-Profile.ps1', 'lib\Write-Helpers.ps1'
     ) {
         $file = Join-Path $script:toolkitRoot $_
@@ -27,9 +27,9 @@ Describe "Script Syntax Validation" {
 
 Describe "Script Help Blocks" {
     It "<_> has a synopsis" -ForEach @(
-        'Fix-NetworkStack.ps1', 'Harden-Security.ps1', 'Install-ScheduledTasks.ps1',
-        'Monitor-SystemHealth.ps1', 'Optimize-WSL.ps1', 'Repair-WindowsHealth.ps1',
-        'Update-AllPackages.ps1', 'wst.ps1'
+        'Fix-NetworkStack.ps1', 'Fix-WSLGPU.ps1', 'Harden-Security.ps1',
+        'Install-ScheduledTasks.ps1', 'Monitor-SystemHealth.ps1', 'Optimize-WSL.ps1',
+        'Repair-WindowsHealth.ps1', 'Update-AllPackages.ps1', 'wst.ps1'
     ) {
         $file = Join-Path $script:toolkitRoot $_
         $help = Get-Help $file -ErrorAction SilentlyContinue

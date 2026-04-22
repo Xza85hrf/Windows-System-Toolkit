@@ -1,10 +1,10 @@
 {
-    "version": "2.1.0",
+    "version": "2.2.0",
     "description": "Windows System Toolkit - system maintenance, security hardening, and automation",
     "homepage": "https://github.com/Xza85hrf/Windows-System-Toolkit",
     "license": "MIT",
-    "url": "https://github.com/Xza85hrf/Windows-System-Toolkit/archive/refs/tags/v2.1.0.zip",
-    "extract_dir": "Windows-System-Toolkit-2.1.0",
+    "url": "https://github.com/Xza85hrf/Windows-System-Toolkit/archive/refs/tags/v2.2.0.zip",
+    "extract_dir": "Windows-System-Toolkit-2.2.0",
     "bin": "wst.ps1",
     "post_install": [
         "Write-Host 'Windows System Toolkit installed!' -ForegroundColor Green",

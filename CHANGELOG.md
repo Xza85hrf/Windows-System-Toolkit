@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.2.0] - 2026-04-23
+
+### Added
+- **Fix-WSLGPU.ps1** - WSL2 GPU passthrough diagnostics and fix tool
+  - 7-step diagnostic: Windows NVIDIA driver, WSL2 version, `.wslconfig`, `/dev/dxg`, CUDA libraries, PyTorch CUDA, NVIDIA services
+  - `-QuickTest` - fast path that only verifies nvidia-smi on Windows, in WSL2, and PyTorch CUDA visibility
+  - `-ReportOnly` - diagnostic-only, safe mode
+  - `-FixAll` - apply every recommended fix without prompting (admin required)
+  - Auto-backup of `.wslconfig` before modification
+  - Auto-reduce WSL memory to 64GB when excessive allocation exhausts GPU BAR mapping
+  - Adds `/usr/lib/wsl/lib` to `LD_LIBRARY_PATH` in `~/.bashrc` and `~/.zshrc`
+  - Restarts `NVDisplay.ContainerLocalSystem` when stopped
+  - Post-fix verification runs nvidia-smi inside WSL2 after `wsl --shutdown`
+- `wst wslgpu` subcommand and `[G]` interactive menu entry
+- Tab completion entry for `wslgpu`
+
+### Fixed
+- `$WST_VERSION` in `wst.ps1` was stuck at `2.0.0` despite the 2.1.0 release - now tracks the actual release
+
 ## [2.1.0] - 2026-03-28
 
 ### Added
