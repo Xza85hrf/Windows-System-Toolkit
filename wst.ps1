@@ -379,7 +379,7 @@ function Show-InteractiveMenu {
     }
 
     while ($true) {
-        Clear-Host
+        Clear-HostSafe
         Write-Host ""
         Write-Host "  +-------------------------------------------------------------+" -ForegroundColor Magenta
         Write-Host "  |     WINDOWS SYSTEM TOOLKIT  v$WST_VERSION                        |" -ForegroundColor Magenta

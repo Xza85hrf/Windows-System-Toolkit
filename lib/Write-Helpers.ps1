@@ -50,13 +50,20 @@ function Write-Data {
     if ($logFile) { Add-Content -Path $logFile -Value "    $msg" }
 }
 
+function Clear-HostSafe {
+    # Clear-Host manipulates the console cursor, which throws
+    # "The handle is invalid" under non-interactive hosts (scheduled
+    # tasks, redirected I/O, CI). Swallow the failure there.
+    try { Clear-Host } catch { }
+}
+
 function Write-Banner {
     param(
         [string]$Title,
         [string]$Subtitle = "Run on: $env:COMPUTERNAME",
         [switch]$ShowAdminNote
     )
-    Clear-Host
+    Clear-HostSafe
     Write-Host ""
     Write-Host "  =============================================================" -ForegroundColor Magenta
     Write-Host "    WINDOWS SYSTEM TOOLKIT - $Title" -ForegroundColor Magenta
