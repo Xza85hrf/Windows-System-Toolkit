@@ -8,7 +8,14 @@ This toolkit runs with Administrator privileges for many operations (DISM, SFC, 
 
 - **Reads** system state (CPU, RAM, disk, network, services)
 - **Modifies** Windows settings only when explicitly requested (network metrics, firewall, temp files)
-- **Never** transmits data externally (all operations are local)
+- **Does not transmit user data.** Two outbound HTTP requests are made,
+  both limited to public non-PII endpoints:
+  - `Fix-NetworkStack.ps1` probes Microsoft's Network Connectivity
+    Status Indicator URL (`http://www.msftconnecttest.com/connecttest.txt`
+    by default, overridable via `Network.ncsiProbeUrl` in config) to
+    verify internet reachability — same mechanism Windows itself uses.
+  - `remote-install.ps1` downloads the toolkit zip from this GitHub
+    repo when bootstrapping installation on a fresh machine.
 - **Never** stores credentials or secrets
 - **Logs** all operations to local files in `logs/`
 
